@@ -6,6 +6,7 @@ provider "aws" {
 resource "aws_security_group" "nlb_sg" {
   name        = "nlb-security-group"
   description = "Security group for NLB"
+  vpc_id      = "{{ $sys.deploymentCell.cloudProviderNetworkID }}"
 
   ingress {
     from_port   = 5432
