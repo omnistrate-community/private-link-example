@@ -1,65 +1,115 @@
 name: Private Postgresql Service
 deployment:
   hostedDeployment:
-    AwsAccountId: '339713121445'
-    AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
+    AwsAccountId: '<service-provider-aws-account-id>'
+    AwsBootstrapRoleAccountArn: 'arn:aws:iam::<service-provider-aws-account-id>:role/omnistrate-bootstrap-role'
+
 services:
   - name: terraform
     internal: true
     terraformConfigurations:
       configurationPerCloudProvider:
         aws:
-          terraformPath: /e2etestv2/original/terraform
+          terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v3.7.7
+            reference: refs/tags/0.0.1
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
-            accessToken: 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
-          terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
+          terraformExecutionIdentity: "arn:aws:iam::<service-provider-aws-account-id>:role/omnistrate-custom-terraform-execution-role"
+          requiredOutputs:
+            - key: "vpc_endpoint_service_name"
+              exported: true
+            - key: "vpc_endpoint_service_dns_name"
+              exported: true
+            - key: "target_group_arn"
+              exported: false
         gcp:
-          terraformPath: /e2etestv2/original/terraform
+          terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v3.7.7
+            reference: refs/tags/0.0.1
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
-            accessToken: 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
           terraformExecutionIdentity: "fill in service account"
+    apiParameters:
+      - key: connectAccountID
+        description: Account ID to connect to
+        name: Connect Account ID
+        type: String
+        modifiable: true
+        required: true
+        export: true
   - name: helm
     internal: true
     dependsOn:
       - terraform
-    terraformConfigurations:
-      configurationPerCloudProvider:
-        aws:
-          terraformPath: /e2etestv2/original/terraform2
-          gitConfiguration:
-            reference: refs/tags/v3.7.7
-            repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
-            accessToken: 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
-          terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
-        gcp:
-          terraformPath: /e2etestv2/original/terraform2
-          gitConfiguration:
-            reference: refs/tags/v3.7.7
-            repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
-            accessToken: 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
-          terraformExecutionIdentity: "fill in service account"
-  - name: kustomize
-    dependsOn:
-      - helm
     compute:
       instanceTypes:
-        - name: t4g.small
+        - apiParam: instanceType
           cloudProvider: aws
-        - name: e2-medium
+        - apiParam: instanceType
           cloudProvider: gcp
-    network:
-      ports:
-        - 3306
-    kustomizeConfiguration:
-      kustomizePath: /e2etestv2/original/kustomize
-      gitConfiguration:
-        reference: refs/tags/v3.7.7
-        repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
-        accessToken: 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
+      network:
+        ports:
+          - 5432
+    helmChartConfiguration:
+        chartName: postgresql
+        chartVersion: 16.3.2
+        chartRepoName: bitnami
+        chartRepoURL: https://charts.bitnami.com/bitnami
+        chartValues:
+          global:
+            postgresql:
+              auth:
+                postgresPassword: "{{ $var.password }}"
+                password: "{{ $var.username }}"
+                username: "{{ $var.password }}"
+                database: "postgres"
+          primary:
+            podLabels:
+              omnistrate.com/schedule-mode: exclusive
+            persistence:
+              enabled: false
+            service:
+              name: "postgres"
+              type: ClusterIP
+              annotations:
+                external-dns.alpha.kubernetes.io/hostname: "{{ $sys.network.internalClusterEndpoint }}"
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 150m
+                memory: 256Mi
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: omnistrate.com/managed-by
+                          operator: In
+                          values:
+                            - omnistrate
+                        - key: topology.kubernetes.io/region
+                          operator: In
+                          values:
+                            - $sys.deploymentCell.region
+                        - key: node.kubernetes.io/instance-type
+                          operator: In
+                          values:
+                            - $sys.compute.node.instanceType
+                        - key: omnistrate.com/resource
+                          operator: In
+                          values:
+                            - $sys.deployment.resourceID
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  - labelSelector:
+                      matchExpressions:
+                        - key: omnistrate.com/schedule-mode
+                          operator: In
+                          values:
+                            - exclusive
+                    namespaceSelector: { }
+                    topologyKey: kubernetes.io/hostname
     apiParameters:
       - key: username
         description: Username
@@ -77,3 +127,77 @@ services:
         required: false
         export: false
         defaultValue: postgres
+      - key: connectAccountID
+        description: Account ID to connect to
+        name: Connect Account ID
+        type: String
+        modifiable: true
+        required: true
+        export: true
+        parameterDependencyMap:
+            terraform: connectAccountID
+      - key: instanceType
+        description: Instance Type
+        name: Instance Type
+        type: String
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: t4g.small
+  - name: kustomize
+    dependsOn:
+      - helm
+    compute:
+      instanceTypes:
+        - name: t4g.small
+          cloudProvider: aws
+        - name: e2-medium
+          cloudProvider: gcp
+    network:
+      ports:
+        - 3306
+    kustomizeConfiguration:
+      kustomizePath: /kustomize
+      gitConfiguration:
+        reference: refs/tags/0.0.1
+        repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
+    apiParameters:
+      - key: username
+        description: Username
+        name: Username
+        type: String
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: username
+        parameterDependencyMap:
+          helm: username
+      - key: password
+        description: Default DB Password
+        name: Password
+        type: String
+        modifiable: false
+        required: false
+        export: false
+        defaultValue: postgres
+        parameterDependencyMap:
+          helm: password
+      - key: instanceType
+        description: Instance Type
+        name: Instance Type
+        type: String
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: t4g.small
+        parameterDependencyMap:
+          helm: instanceType
+      - key: connectAccountID
+        description: Account ID to connect to
+        name: Connect Account ID
+        type: String
+        modifiable: true
+        required: true
+        export: true
+        parameterDependencyMap:
+          helm: connectAccountID

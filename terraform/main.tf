@@ -45,10 +45,10 @@ resource "aws_lb" "ps_lb" {
   load_balancer_type = "network"
   security_groups    = [aws_security_group.nlb_sg.id]
 
-  subnet_ids = [
-    "{{ $sys.deploymentCell.publicSubnetIDs[0].id }}",
-    "{{ $sys.deploymentCell.publicSubnetIDs[1].id }}",
-    "{{ $sys.deploymentCell.publicSubnetIDs[2].id }}"
+  subnets = [
+    "{{ $sys.deploymentCell.privateSubnetIDs[0].id }}",
+    "{{ $sys.deploymentCell.privateSubnetIDs[1].id }}",
+    "{{ $sys.deploymentCell.privateSubnetIDs[2].id }}"
   ]
 
   enable_deletion_protection = false
