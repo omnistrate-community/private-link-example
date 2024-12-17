@@ -1,0 +1,10 @@
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: postgres-targetgroup-binding
+  namespace: "{{ $sys.id }}"
+spec:
+  serviceRef:
+    name: postgres
+    port: 5432
+  targetGroupARN: "{{ $terraform.out.target_group_arn }}"

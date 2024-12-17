@@ -1,0 +1,4 @@
+resources:
+  - targetGroupBinding.yaml
+
+namespace: "{{ $sys.id }}"
