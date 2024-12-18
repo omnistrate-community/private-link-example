@@ -5,6 +5,7 @@ metadata:
   namespace: "{{ $sys.id }}"
 spec:
   serviceRef:
-    name: postgres
+    namespace: "{{ $sys.id }}"
+    name: helm-postgres
     port: 5432
   targetGroupARN: "{{ $terraform.out.target_group_arn }}"
