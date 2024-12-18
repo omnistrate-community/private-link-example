@@ -32,7 +32,7 @@ resource "aws_lb_target_group" "ps_target_group" {
   target_type = "ip"
 
   health_check {
-    port                = "5432"
+    port                = "traffic-port"
     protocol            = "TCP"
     interval            = 30
     healthy_threshold   = 3
