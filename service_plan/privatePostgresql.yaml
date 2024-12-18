@@ -12,7 +12,7 @@ services:
         aws:
           terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v0.0.3
+            reference: refs/tags/v0.0.4
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
           terraformExecutionIdentity: "arn:aws:iam::<service-provider-aws-account-id>:role/omnistrate-custom-terraform-execution-role"
           requiredOutputs:
@@ -25,7 +25,7 @@ services:
         gcp:
           terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v0.0.3
+            reference: refs/tags/v0.0.4
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
           terraformExecutionIdentity: "fill in service account"
     apiParameters:
@@ -49,6 +49,8 @@ services:
       network:
         ports:
           - 5432
+    capabilities:
+      networkType: "INTERNAL"
     helmChartConfiguration:
         chartName: postgresql
         chartVersion: 16.3.2
@@ -146,6 +148,7 @@ services:
         defaultValue: t4g.small
   - name: kustomize
     dependsOn:
+      - terraform
       - helm
     compute:
       instanceTypes:
@@ -159,7 +162,7 @@ services:
     kustomizeConfiguration:
       kustomizePath: /kustomize
       gitConfiguration:
-        reference: refs/tags/v0.0.3
+        reference: refs/tags/v0.0.4
         repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
     apiParameters:
       - key: username
