@@ -72,8 +72,6 @@ services:
             service:
               name: "postgres"
               type: ClusterIP
-              annotations:
-                external-dns.alpha.kubernetes.io/hostname: "{{ $sys.network.internalClusterEndpoint }}"
             resources:
               requests:
                 cpu: 100m
@@ -159,6 +157,8 @@ services:
     network:
       ports:
         - 3306
+    capabilities:
+      networkType: "INTERNAL"
     kustomizeConfiguration:
       kustomizePath: /kustomize
       gitConfiguration:
@@ -204,3 +204,4 @@ services:
         export: true
         parameterDependencyMap:
           helm: connectAccountID
+          terraform: connectAccountID
