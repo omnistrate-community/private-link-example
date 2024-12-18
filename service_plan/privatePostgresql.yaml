@@ -12,7 +12,7 @@ services:
         aws:
           terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v0.0.6
+            reference: refs/tags/v0.0.7
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
           terraformExecutionIdentity: "arn:aws:iam::<service-provider-aws-account-id>:role/omnistrate-custom-terraform-execution-role"
           requiredOutputs:
@@ -25,7 +25,7 @@ services:
         gcp:
           terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v0.0.6
+            reference: refs/tags/v0.0.7
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
           terraformExecutionIdentity: "fill in service account"
     apiParameters:
@@ -70,7 +70,6 @@ services:
             persistence:
               enabled: false
             service:
-              name: "postgres"
               type: ClusterIP
             resources:
               requests:
@@ -152,7 +151,7 @@ services:
     kustomizeConfiguration:
       kustomizePath: /kustomize
       gitConfiguration:
-        reference: refs/tags/v0.0.6
+        reference: refs/tags/v0.0.7
         repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
     apiParameters:
       - key: username

@@ -5,7 +5,6 @@ metadata:
   namespace: "{{ $sys.id }}"
 spec:
   serviceRef:
-    namespace: "{{ $sys.id }}"
-    name: helm-postgres
+    name: helm-postgresql # This is the name of the service that the target group will be bound to
     port: 5432
   targetGroupARN: "{{ $terraform.out.target_group_arn }}"
