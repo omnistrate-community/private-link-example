@@ -12,7 +12,7 @@ services:
         aws:
           terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v0.0.4
+            reference: refs/tags/v0.0.6
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
           terraformExecutionIdentity: "arn:aws:iam::<service-provider-aws-account-id>:role/omnistrate-custom-terraform-execution-role"
           requiredOutputs:
@@ -25,7 +25,7 @@ services:
         gcp:
           terraformPath: /terraform
           gitConfiguration:
-            reference: refs/tags/v0.0.4
+            reference: refs/tags/v0.0.6
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
           terraformExecutionIdentity: "fill in service account"
     apiParameters:
@@ -148,21 +148,11 @@ services:
     dependsOn:
       - terraform
       - helm
-    compute:
-      instanceTypes:
-        - name: t4g.small
-          cloudProvider: aws
-        - name: e2-medium
-          cloudProvider: gcp
-    network:
-      ports:
-        - 3306
-    capabilities:
-      networkType: "INTERNAL"
+    passive: true
     kustomizeConfiguration:
       kustomizePath: /kustomize
       gitConfiguration:
-        reference: refs/tags/v0.0.4
+        reference: refs/tags/v0.0.6
         repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
     apiParameters:
       - key: username
