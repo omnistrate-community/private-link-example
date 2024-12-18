@@ -29,6 +29,7 @@ resource "aws_lb_target_group" "ps_target_group" {
   port     = 5432
   protocol = "TCP"
   vpc_id   = "{{ $sys.deploymentCell.cloudProviderNetworkID }}"
+  target_type = "ip"
 
   health_check {
     port                = "5432"
@@ -45,6 +46,7 @@ resource "aws_lb" "ps_lb" {
   internal           = false
   load_balancer_type = "network"
   security_groups    = [aws_security_group.nlb_sg.id]
+  enable_cross_zone_load_balancing = true
 
   subnets = [
     "{{ $sys.deploymentCell.privateSubnetIDs[0].id }}",
