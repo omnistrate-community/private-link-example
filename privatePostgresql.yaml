@@ -1,8 +1,8 @@
 name: Private Postgresql Service
 deployment:
   hostedDeployment:
-    AwsAccountId: '<service-provider-aws-account-id>'
-    AwsBootstrapRoleAccountArn: 'arn:aws:iam::<service-provider-aws-account-id>:role/omnistrate-bootstrap-role'
+    AwsAccountId: '<service-provider-account-id>'
+    AwsBootstrapRoleAccountArn: 'arn:aws:iam::<service-provider-account-id>:role/omnistrate-bootstrap-role'
 
 services:
   - name: terraform
@@ -14,7 +14,7 @@ services:
           gitConfiguration:
             reference: refs/tags/v0.0.10
             repositoryUrl: https://github.com/omnistrate-community/private-link-example.git
-          terraformExecutionIdentity: "arn:aws:iam::<service-provider-aws-account-id>:role/omnistrate-custom-terraform-execution-role"
+          terraformExecutionIdentity: "arn:aws:iam::<service-provider-account-id>:role/omnistrate-custom-terraform-execution-role"
           requiredOutputs:
             - key: "vpc_endpoint_service_name"
               exported: true
@@ -143,7 +143,7 @@ services:
         required: false
         export: true
         defaultValue: t4g.small
-  - name: kustomize
+  - name: privatePostgres
     dependsOn:
       - terraform
       - helm

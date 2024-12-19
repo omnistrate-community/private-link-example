@@ -19,4 +19,4 @@ login:
 
 .PHONY: build
 build:
-	omnistrate-ctl build -f service-plan-spec.yaml --name $(SERVICE_PLAN_NAME) --spec-type ServicePlanSpec --release-as-preferred
+	omnistrate-ctl build -f privatePostgresql.yaml --name $(SERVICE_PLAN_NAME) --spec-type ServicePlanSpec --release-as-preferred
