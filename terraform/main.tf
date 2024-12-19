@@ -45,7 +45,7 @@ resource "aws_lb" "ps_lb" {
   name               = "postgres-nlb"
   internal           = false
   load_balancer_type = "network"
-  security_groups    = [aws_security_group.nlb_sg.id]
+  security_groups    = [aws_security_group.nlb_sg.id, "{{ $sys.deploymentCell.securityGroupID }}"]
   enable_cross_zone_load_balancing = true
 
   subnets = [
